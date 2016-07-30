@@ -6,19 +6,73 @@
 </head>
 <body>
     <script src="https://www.gstatic.com/firebasejs/3.2.1/firebase.js"></script>
-    <script src="./handy.js"/></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/live/0.4/firebase-ui-auth.js"></script>
+    <script src="./handy.js"></script>
     <script type="text/javascript">
-        var config = {
-            apiKey: "AIzaSyAExJ9UJsJ0pMV_U5afsQdCAYpy6Wyu4B8",
-            authDomain: "handy-d5c57.firebaseapp.com",
-            databaseURL: "https://handy-d5c57.firebaseio.com",
-            storageBucket: "handy-d5c57.appspot.com",
-          };
 
-        firebase.initializeApp(config);
+      var app = Elm.Handy.fullscreen();
 
-        //
-        Elm.Main.fullscreen();
+      //
+
+      firebase.initializeApp({
+        apiKey: "AIzaSyAExJ9UJsJ0pMV_U5afsQdCAYpy6Wyu4B8",
+        authDomain: "handy-d5c57.firebaseapp.com",
+        databaseURL: "https://handy-d5c57.firebaseio.com",
+        storageBucket: "handy-d5c57.appspot.com"
+      });
+
+
+      // https://github.com/elm-lang/core/issues/595
+      setTimeout(function() {
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (user) {
+            app.ports.signin.send({"name": user.displayName, "email": user.email});
+
+          } else {
+            app.ports.signout.send(true);
+          }
+        });
+      }, 0);
+
+
+      app.ports.sendSignOut.subscribe(
+        function() {
+          firebase.auth().signOut().then(
+            function() {
+              app.ports.signout.send(true);
+            }
+          );
+        },
+        function(error) {
+          console.log(error);
+        }
+      );
+
+      app.ports.authenticateUsingFacebook.subscribe(
+        function() {
+          var provider = new firebase.auth.FacebookAuthProvider();
+
+          provider.addScope("email");
+
+          firebase.auth().signInWithPopup(provider).then(
+            function(result) {
+              app.ports.signin.send({"name": result.user.displayName, "email": result.user.email});
+            }
+          ).catch(
+            function(error) {
+              console.log(error);
+            }
+          );
+        }
+      );
+
+
+
+
+      //
+
+
+
     </script>
 </body>
 </html>
