@@ -24,7 +24,6 @@ type alias Model =
 type Msg
   = SignIn User
   | SignOut Bool
-  | Check
   | SendSignOut
   | AuthenticateUsingFacebook
 
@@ -35,8 +34,8 @@ init =
 
 update msg model =
   case msg of
-    Check ->
-      ( model, checkUser () )
+    AuthenticateUsingFacebook ->
+      ( model, authenticateUsingFacebook () )
 
     SignIn user ->
       ( { model | user = Just <| Just <| user }, Cmd.none )
@@ -47,19 +46,14 @@ update msg model =
     SignOut _ ->
       ( { model | user = Just Nothing }, Cmd.none )
 
-    AuthenticateUsingFacebook ->
-      ( model, authenticateUsingFacebook () )
 
-
-port checkUser : () -> Cmd msg
+port authenticateUsingFacebook : () -> Cmd msg
 
 port signin : (User -> msg) -> Sub msg
 
 port sendSignOut : () -> Cmd msg
 
 port signout : (Bool -> msg) -> Sub msg
-
-port authenticateUsingFacebook : () -> Cmd msg
 
 
 subscriptions model =
